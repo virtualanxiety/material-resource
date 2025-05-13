@@ -8,23 +8,23 @@
         html, body {
             height: 100%;
             margin: 0;
-            overflow: hidden; /* Prevent scrollbars on body due to flex layout */
             font-family: Arial, sans-serif;
         }
 
         body {
             display: flex;
+            overflow: hidden; /* Prevent body scroll on desktop, children handle overflow */
         }
 
         #sidebar {
-            width: 320px; /* Wider to accommodate audio controls and links */
+            width: 320px; 
             flex-shrink: 0; 
             padding: 20px;
             background-color: #f4f4f4;
             border-right: 1px solid #ccc;
             box-sizing: border-box;
-            height: 100%;
-            overflow-y: auto; 
+            height: 100%; /* Full height for desktop */
+            overflow-y: auto; /* Sidebar content scrolls on desktop if needed */
         }
 
         #sidebar h2 {
@@ -96,8 +96,8 @@
         #map-container {
             flex-grow: 1; 
             position: relative; 
-            overflow: hidden; 
-            height: 100%;
+            overflow: hidden; /* Map container itself doesn't scroll, image scales */
+            height: 100%; /* Full height for desktop */
             background-color: #e0e0e0; 
             display: flex; 
             justify-content: center; 
@@ -112,6 +112,32 @@
             user-select: none; 
             -webkit-user-drag: none; 
         }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack sidebar and map vertically */
+                overflow-y: hidden; /* Body itself does not scroll, children manage their scroll */
+                                    /* If you want the whole page to scroll instead, set to 'auto' */
+            }
+
+            #sidebar {
+                width: 100%; /* Sidebar takes full width */
+                height: auto; /* Height based on content */
+                max-height: 45vh; /* Limit sidebar height, internal scroll if content overflows */
+                overflow-y: auto; /* Ensure sidebar content is scrollable */
+                border-right: none; /* Remove side border */
+                border-bottom: 1px solid #ccc; /* Add bottom border as separator */
+                flex-shrink: 0; /* Prevent shrinking if parent has fixed height */
+            }
+
+            #map-container {
+                width: 100%; /* Map container takes full width */
+                flex-grow: 1; /* Map container takes remaining vertical space */
+                height: auto; /* Adjust height automatically, or let flex-grow handle it */
+                min-height: 50vh; /* Ensure map has a decent minimum height */
+            }
+        }
     </style>
 </head>
 <body>
@@ -123,7 +149,7 @@
         <div class="counts-section">
             <h3>AI Object Counts (from aistudio.google.com)</h3>
             <div class="count-box">
-                <label for="redshank-count">Redshank (RK with Red overlay):</label>
+                <label for="redshank-count">Redshank (RK with Pink overlay):</label>
                 <input type="number" id="redshank-count" value="0" min="0">
             </div>
             <div class="count-box">
@@ -172,11 +198,11 @@
             // Data derived from map descriptions for initial counts.
             // This interpretation is based on your specific rules for colors and letters,
             // and a visual scan of the provided map image (from previous interactions).
-            // Redshank (RK, Red overlay, RGB 255,153,153): ~12
+            // Redshank (RK, Pink overlay, RGB 255,153,153): ~12
             // Snipe (S, Green overlay, RGB 153,204,153): ~15
             // Lapwing (L, Blue overlay, RGB 153,204,255): ~4
             const birdDataFromMapInterpretation = [
-                // Redshanks (RK with Red overlay)
+                // Redshanks (RK with Pink overlay)
                 { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
                 { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 2 }, // Example for "2RK"
                 { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
