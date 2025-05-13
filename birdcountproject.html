@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Island Bird Count Visualisation - May 1997</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars on body due to flex layout */
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+        }
+
+        #sidebar {
+            width: 320px; /* Wider to accommodate audio controls and links */
+            flex-shrink: 0; 
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ccc;
+            box-sizing: border-box;
+            height: 100%;
+            overflow-y: auto; 
+        }
+
+        #sidebar h2 {
+            margin-top: 0;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        #sidebar p.site-info {
+            font-size: 0.9em;
+            margin-bottom: 5px; 
+            color: #555;
+            line-height: 1.4;
+        }
+        #sidebar p.author-info {
+            font-size: 0.85em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .counts-section h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .count-box {
+            margin-bottom: 20px;
+        }
+
+        .count-box label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .count-box input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        
+        .audio-player-section h3 {
+            font-size: 1.1em;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        .audio-player-item {
+            margin-bottom: 20px; 
+        }
+        .audio-player-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            font-weight: bold;
+        }
+        .audio-player-item audio {
+            width: 100%;
+            margin-bottom: 5px; 
+        }
+        .audio-player-item .audio-link {
+            display: block;
+            font-size: 0.85em;
+            text-align: right;
+        }
+
+        #map-container {
+            flex-grow: 1; 
+            position: relative; 
+            overflow: hidden; 
+            height: 100%;
+            background-color: #e0e0e0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+
+        #map-image {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; 
+            user-select: none; 
+            -webkit-user-drag: none; 
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Bird Visualisation</h2>
+        <p class="site-info">Long Island, Roscommon - May 1997</p>
+        <p class="author-info">Map Notations by Stephen Heery</p>
+        
+        <div class="counts-section">
+            <h3>AI Object Counts (from aistudio.google.com)</h3>
+            <div class="count-box">
+                <label for="redshank-count">Redshank (RK with Red overlay):</label>
+                <input type="number" id="redshank-count" value="0" min="0">
+            </div>
+            <div class="count-box">
+                <label for="snipe-count">Snipe (S with Green overlay):</label>
+                <input type="number" id="snipe-count" value="0" min="0">
+            </div>
+            <div class="count-box">
+                <label for="lapwing-count">Lapwing (L with Blue overlay):</label>
+                <input type="number" id="lapwing-count" value="0" min="0">
+            </div>
+        </div>
+
+        <div class="audio-player-section">
+            <h3>Bird Sounds</h3>
+            <div class="audio-player-item">
+                <label for="redshank-audio">Redshank:</label>
+                <audio id="redshank-audio" controls src="assets/sounds/Redshank_XC741317.mp3">
+                    Your browser does not support the audio element.
+                </audio>
+                <a href="https://xeno-canto.org/741317" target="_blank" class="audio-link">Source: xeno-canto.org/741317</a>
+            </div>
+            <div class="audio-player-item">
+                <label for="snipe-audio">Snipe:</label>
+                <audio id="snipe-audio" controls src="assets/sounds/Snipe_XC836175.mp3">
+                    Your browser does not support the audio element.
+                </audio>
+                <a href="https://xeno-canto.org/836175" target="_blank" class="audio-link">Source: xeno-canto.org/836175</a>
+            </div>
+            <div class="audio-player-item">
+                <label for="lapwing-audio">Lapwing:</label>
+                <audio id="lapwing-audio" controls src="assets/sounds/Lapwing_XC975772.mp3">
+                    Your browser does not support the audio element.
+                </audio>
+                <a href="https://xeno-canto.org/975772" target="_blank" class="audio-link">Source: xeno-canto.org/975772</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <img id="map-image" src="assets/images/Long_Island_1997_quads.jpg" alt="Map of Long Island, Roscommon - May 1997 Notations by Stephen Heery">
+        <!-- Map is for display only, no interactive elements here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data derived from map descriptions for initial counts.
+            // This interpretation is based on your specific rules for colors and letters,
+            // and a visual scan of the provided map image (from previous interactions).
+            // Redshank (RK, Red overlay, RGB 255,153,153): ~12
+            // Snipe (S, Green overlay, RGB 153,204,153): ~15
+            // Lapwing (L, Blue overlay, RGB 153,204,255): ~4
+            const birdDataFromMapInterpretation = [
+                // Redshanks (RK with Red overlay)
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 2 }, // Example for "2RK"
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
+                { type: 'Redshank', count: 1 }, { type: 'Redshank', count: 1 },
+
+                // Snipes (S with Green overlay)
+                { type: 'Snipe', count: 1 },    { type: 'Snipe', count: 1 },
+                { type: 'Snipe', count: 1 },    { type: 'Snipe', count: 6 }, // Example for "6S"
+                { type: 'Snipe', count: 1 },    { type: 'Snipe', count: 1 },
+                { type: 'Snipe', count: 1 },    { type: 'Snipe', count: 1 },
+                { type: 'Snipe', count: 1 },    { type: 'Snipe', count: 1 },
+
+                // Lapwings (L with Blue overlay)
+                { type: 'Lapwing', count: 1 },
+                { type: 'Lapwing', count: 2 }, // Example for "2L"
+                { type: 'Lapwing', count: 1 }
+            ];
+
+            const mapImage = document.getElementById('map-image'); 
+
+            const redshankCountInput = document.getElementById('redshank-count');
+            const snipeCountInput = document.getElementById('snipe-count');
+            const lapwingCountInput = document.getElementById('lapwing-count');
+
+            function calculateAndSetInitialTotals() {
+                let totalRedshank = 0;
+                let totalSnipe = 0;
+                let totalLapwing = 0;
+
+                birdDataFromMapInterpretation.forEach(bird => {
+                    if (bird.type === 'Redshank') totalRedshank += bird.count;
+                    else if (bird.type === 'Snipe') totalSnipe += bird.count;
+                    else if (bird.type === 'Lapwing') totalLapwing += bird.count;
+                });
+
+                redshankCountInput.value = totalRedshank;
+                snipeCountInput.value = totalSnipe;
+                lapwingCountInput.value = totalLapwing;
+            }
+            
+            function initializeApp() {
+                calculateAndSetInitialTotals();
+                // Input boxes are directly editable by the user.
+                // No further JavaScript action is needed for them based on the current request.
+            }
+
+            if (mapImage.complete && mapImage.naturalWidth !== 0) {
+                initializeApp();
+            } else {
+                mapImage.onload = initializeApp;
+                mapImage.onerror = function() {
+                    console.error("Error loading map image. Please ensure 'Long_Island_1997_quads.jpg' is in the 'assets/images/' directory.");
+                    // Still initialize sidebar functions even if map fails,
+                    // as the counts are based on interpretation, not dynamic map interaction.
+                    initializeApp(); 
+                }
+            }
+        });
+    </script>
+</body>
+</html>
