@@ -53,7 +53,7 @@ body {
 }
 
 .bg-less-dark {
-  background-color: var(--bg-body2);
+background-color: var(--bg-body); /* Updated to match the header's background */
 }
 
 h1,
